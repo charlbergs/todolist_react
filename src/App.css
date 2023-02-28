@@ -20,7 +20,7 @@ table {
   min-width: 60%;
 }
 
-th, td {
+td, th {
   border-bottom: 1px solid #afb1b4;
 }
 

@@ -15,6 +15,11 @@ export default function Todolist() {
         setTodo({description:'', date:''}) // clear input
     };
 
+    // button for deleting a todo
+    const handleDeleteTodo = (row) => { // gets the current row number (index) as a parameter
+        setTodos(todos.filter((todo, index) => row !== index)); // filter away the current row by comparing the indexes
+    }
+
     // format date as d.m.yyyy
     const formatDate = (date) => {
         const dateObj = new Date(date) // convert to date object
@@ -49,6 +54,7 @@ export default function Todolist() {
                     <tr>
                         <th>Description</th>
                         <th>Date</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -57,6 +63,7 @@ export default function Todolist() {
                             <tr key={index}>
                                 <td>{todo.description}</td>
                                 <td>{formatDate(todo.date)}</td>
+                                <td><button onClick={() => handleDeleteTodo(index)}>Done</button></td>
                             </tr>)
                     }
                 </tbody>
