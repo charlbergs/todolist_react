@@ -1,4 +1,5 @@
 import React from 'react';
+import Todotable from './Todotable';
 
 export default function Todolist() {
 
@@ -29,7 +30,7 @@ export default function Todolist() {
         return `${d}.${m}.${y}`;
     }
 
-    // returns 1) the form for adding a new todo, and 2) all added todos in an array
+    // returns 1) the form for adding a new todo, and 2) all added todos in a table (separate imported Todotable component)
     return(
         <div>
             <h1 className='header'>Simple Todolist</h1>
@@ -49,26 +50,7 @@ export default function Todolist() {
                 />
                 <button onClick={handleAddTodo}>Add</button>
             </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Description</th>
-                        <th>Date</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {
-                        todos.map((todo, index) => 
-                            <tr key={index}>
-                                <td>{todo.description}</td>
-                                <td>{formatDate(todo.date)}</td>
-                                <td><button onClick={() => handleDeleteTodo(index)}>Done</button></td>
-                            </tr>)
-                    }
-                </tbody>
-            </table>
-
+            <Todotable todos={todos} formatDate={formatDate} handleDeleteTodo={handleDeleteTodo}/>
         </div>
     );
 }
