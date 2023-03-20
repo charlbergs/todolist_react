@@ -1,24 +1,49 @@
-import React from 'react';
-import Todotable from './Todotable';
+import React, { useState, useRef } from 'react';
+import { AgGridReact } from 'ag-grid-react';
+import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
+import Stack from '@mui/material/Stack';
+import AddIcon from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
+
+import 'ag-grid-community/styles/ag-grid.css';
+import 'ag-grid-community/styles/ag-theme-material.css';
 
 export default function Todolist() {
 
     // states for todo array and single todo objects
-    const [todos, setTodos] = React.useState([]);
-    const [todo, setTodo] = React.useState({
+    const [todos, setTodos] = useState([]);
+    const [todo, setTodo] = useState({
         description: '',
-        date: ''
+        date: '',
+        priority: ''
     });
+    // reference for ag-grid component's methods
+    const gridRef = useRef();
+    // ag-grid table columns: columnDefs defines single columns and gridOptions defines all rows
+    const columnDefs = [
+        {field: 'description', sortable: true, filter: true, floatingFilter: true},
+        {field: 'date', sortable: true, filter: true, floatingFilter: true},
+        {field: 'priority', sortable: true, filter: true, floatingFilter: true,
+        cellStyle: params => params.value === 'High' ? {color: 'red'} : {color: 'black'}}, // if priority is 'High' it is shown as red
+    ];
+    const gridOptions = {
+        animateRows: true
+    };
 
     // button for adding a new todo
     const handleAddTodo = () => {
         setTodos([...todos, todo]); // insert to todos
-        setTodo({description:'', date:''}) // clear input
+        setTodo({description:'', date:'', priority: ''}) // clear input
     };
 
     // button for deleting a todo
-    const handleDeleteTodo = (row) => { // gets the current row number (index) as a parameter
-        setTodos(todos.filter((todo, index) => row !== index)); // filter away the current row by comparing the indexes
+    const handleDeleteTodo = () => {
+        // filter away the current row by comparing the indexes
+        if (gridRef.current.getSelectedNodes().length > 0)
+            setTodos(todos.filter((todo, index) => gridRef.current.getSelectedNodes()[0].id != index));
+        else
+            alert('Please select a row');
     }
 
     // format date as d.m.yyyy
@@ -30,27 +55,49 @@ export default function Todolist() {
         return `${d}.${m}.${y}`;
     }
 
-    // returns 1) the form for adding a new todo, and 2) all added todos in a table (separate imported Todotable component)
+    // returns 1) the form for adding a new todo, and 2) all added todos in a table (ag-grid)
     return(
         <div>
-            <h1 className='header'>Simple Todolist</h1>
+            
             <div className='addTodo'>
-                <label htmlFor='descr'>Description: </label>
-                <input 
-                    id='descr'
-                    value={todo.description}
-                    onChange={event => setTodo({...todo, description: event.target.value})}
-                />
-                <label htmlFor='date'> Date: </label>
-                <input 
-                    id='date'
-                    type='date'
-                    value={todo.date}
-                    onChange={event => setTodo({...todo, date: event.target.value})}
-                />
-                <button onClick={handleAddTodo}>Add</button>
+                <Stack direction='row' spacing={2} alignItems='center' justifyContent='center'>
+                    <TextField 
+                        variant='standard'
+                        label='description'
+                        id='descr'
+                        value={todo.description}
+                        onChange={event => setTodo({...todo, description: event.target.value})}
+                    />
+                    <TextField 
+                        // date is given as a string for now
+                        variant='standard'
+                        label='date'
+                        id='date'
+                        value={todo.date}
+                        onChange={event => setTodo({...todo, date: event.target.value})}
+                    />
+                    <TextField 
+                        variant='standard'
+                        label='priority'
+                        id='priority'
+                        value={todo.priority}
+                        onChange={event => setTodo({...todo, priority: event.target.value})}
+                    /> 
+                    <Button size='medium' startIcon={<AddIcon/>} variant='contained' onClick={handleAddTodo}>Add</Button>
+                    <Button size='medium' startIcon={<DeleteIcon/>} variant='contained' color='error' onClick={handleDeleteTodo}>Delete</Button>
+                </Stack>
             </div>
-            <Todotable todos={todos} formatDate={formatDate} handleDeleteTodo={handleDeleteTodo}/>
+            <div className='ag-theme-material' style={{height: 500, width: 600, margin: 'auto'}}>
+                <AgGridReact 
+                    ref={gridRef}
+                    onGridReady = {params => gridRef.current = params.api}
+                    rowData={todos}
+                    columnDefs={columnDefs}
+                    gridOptions={gridOptions}
+                    rowSelection='single' // for selecting a row for delete functionality
+                />
+            </div>
+            
         </div>
     );
 }
