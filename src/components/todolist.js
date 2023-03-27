@@ -5,6 +5,9 @@ import TextField from '@mui/material/TextField';
 import Stack from '@mui/material/Stack';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-material.css';
@@ -31,10 +34,22 @@ export default function Todolist() {
         animateRows: true
     };
 
+    // state for the date from datepicker
+    const [date, setDate] = useState(''); // empty string at first
+
+    // function for handling the date change
+    function handleChangeDate(pickedDate) {
+        setDate(pickedDate); // picked date is set as date state
+        // format picked date as d.m.yyyy (datejs date has $D, $M and $y attributes)
+        const formattedDate = pickedDate.$D ? `${pickedDate.$D}.${pickedDate.$M + 1}.${pickedDate.$y}` : ''; // if $D doesn't exist, date is set as blank
+        setTodo({...todo, date: formattedDate}); // the formatted date is set as todo's date
+    }
+
     // button for adding a new todo
     const handleAddTodo = () => {
         setTodos([...todos, todo]); // insert to todos
-        setTodo({description:'', date:'', priority: ''}) // clear input
+        setTodo({description:'', date:'', priority: ''}); // clear todo input
+        setDate(''); // clear datepicker
     };
 
     // button for deleting a todo
@@ -44,15 +59,6 @@ export default function Todolist() {
             setTodos(todos.filter((todo, index) => gridRef.current.getSelectedNodes()[0].id != index));
         else
             alert('Please select a row');
-    }
-
-    // format date as d.m.yyyy
-    const formatDate = (date) => {
-        const dateObj = new Date(date) // convert to date object
-        const d = dateObj.getDate();
-        const m = dateObj.getMonth() + 1; // first month is 0 so +1 is needed
-        const y = dateObj.getFullYear();
-        return `${d}.${m}.${y}`;
     }
 
     // returns 1) the form for adding a new todo, and 2) all added todos in a table (ag-grid)
@@ -68,14 +74,14 @@ export default function Todolist() {
                         value={todo.description}
                         onChange={event => setTodo({...todo, description: event.target.value})}
                     />
-                    <TextField 
-                        // date is given as a string for now
-                        variant='standard'
-                        label='date'
-                        id='date'
-                        value={todo.date}
-                        onChange={event => setTodo({...todo, date: event.target.value})}
-                    />
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                        <DatePicker
+                            label='date'
+                            value={date}
+                            format='DD.MM.YYYY'
+                            onChange={date => handleChangeDate(date)} 
+                        />
+                    </LocalizationProvider>
                     <TextField 
                         variant='standard'
                         label='priority'
