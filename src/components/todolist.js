@@ -68,7 +68,7 @@ export default function Todolist() {
             <div className='addTodo'>
                 <Stack direction='row' spacing={2} alignItems='center' justifyContent='center'>
                     <TextField 
-                        variant='standard'
+                        variant='outlined'
                         label='description'
                         id='descr'
                         value={todo.description}
@@ -83,7 +83,7 @@ export default function Todolist() {
                         />
                     </LocalizationProvider>
                     <TextField 
-                        variant='standard'
+                        variant='outlined'
                         label='priority'
                         id='priority'
                         value={todo.priority}
