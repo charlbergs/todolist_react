@@ -8,6 +8,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import dayjs from 'dayjs';
 
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-material.css';
@@ -26,7 +27,8 @@ export default function Todolist() {
     // ag-grid table columns: columnDefs defines single columns and gridOptions defines all rows
     const columnDefs = [
         {field: 'description', sortable: true, filter: true, floatingFilter: true},
-        {field: 'date', sortable: true, filter: true, floatingFilter: true},
+        {field: 'date', sortable: true, filter: true, floatingFilter: true,
+        valueFormatter: params => dayjs(params.value).format('DD.MM.YYYY')},
         {field: 'priority', sortable: true, filter: true, floatingFilter: true,
         cellStyle: params => params.value === 'High' ? {color: 'red'} : {color: 'black'}}, // if priority is 'High' it is shown as red
     ];
@@ -34,22 +36,10 @@ export default function Todolist() {
         animateRows: true
     };
 
-    // state for the date from datepicker
-    const [date, setDate] = useState(''); // empty string at first
-
-    // function for handling the date change
-    function handleChangeDate(pickedDate) {
-        setDate(pickedDate); // picked date is set as date state
-        // format picked date as d.m.yyyy (datejs date has $D, $M and $y attributes)
-        const formattedDate = pickedDate.$D ? `${pickedDate.$D}.${pickedDate.$M + 1}.${pickedDate.$y}` : ''; // if $D doesn't exist, date is set as blank
-        setTodo({...todo, date: formattedDate}); // the formatted date is set as todo's date
-    }
-
     // button for adding a new todo
     const handleAddTodo = () => {
         setTodos([...todos, todo]); // insert to todos
         setTodo({description:'', date:'', priority: ''}); // clear todo input
-        setDate(''); // clear datepicker
     };
 
     // button for deleting a todo
@@ -77,9 +67,9 @@ export default function Todolist() {
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                         <DatePicker
                             label='date'
-                            value={date}
+                            value={todo.date}
                             format='DD.MM.YYYY'
-                            onChange={date => handleChangeDate(date)} 
+                            onChange={(dateVal) => {setTodo({...todo, date: dateVal})}} 
                         />
                     </LocalizationProvider>
                     <TextField 
